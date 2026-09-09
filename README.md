@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Problem Validation Agent
+
+AI-powered B2B SaaS problem-validation agent that analyzes founder-provided customer interviews,
+notes, and form responses to determine whether an ICP problem hypothesis is supported by real
+evidence.
+
+**Phase 1 (current):** primary research only. You paste in interview notes/transcripts/form
+responses; the agent extracts and classifies evidence, scores commercial-validation dimensions,
+checks for contradictions, and produces a validation report — no external or secondary research
+is used.
+
+**Phase 2 (planned):** secondary research via Tavily/Exa to supplement primary research.
+
+## How it works
+
+1. `src/components/ValidationForm.tsx` collects the product idea, ICP hypothesis, problem
+   hypothesis, and primary research.
+2. `POST /api/validate` (`src/app/api/validate/route.ts`) validates the input and runs
+   `runValidationWorkflow` (`src/lib/workflow.ts`):
+   - **analyze_evidence** — one LLM call that extracts and classifies claims as evidence,
+     assumption, opinion, or unknown.
+   - **analyze_judgment** — one LLM call that scores commercial-validation dimensions, finds
+     contradictions, identifies evidence gaps, and writes the narrative.
+   - **calculate_validation** — deterministic (no LLM) scoring/status logic in code.
+3. `src/components/ReportView.tsx` renders the resulting report.
+
+Both LLM calls run through the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway).
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
+cp .env.example .env.local   # then set AI_GATEWAY_API_KEY
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Open [http://localhost:3000](http://localhost:3000).
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+On Vercel, `AI_GATEWAY_API_KEY` is provided automatically via OIDC and can be omitted from
+project env vars.
